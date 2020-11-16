@@ -1,13 +1,36 @@
 import React, { Fragment, useState } from 'react';
 import './creatingTopicModal.scss';
-import { useDispatch } from "react-redux";
-import { addTopic } from "../../../../_actions/topicAction";
 import { useHistory } from 'react-router';
 import { withRouter } from "react-router-dom";
+import { gql, useMutation } from '@apollo/react-hooks';
+/*
+const CREATE_NEW_TOPIC = gql `
+  mutation createNewTopic($topicName:String!, $topicType:String!, $topicDesc:String){
+    createNewTopic(topicName:$topicName, topicType:$topicType, topicDesc: $topicDesc){
+      ok
+      error
+      token
+    }
+  }
+`
+*/
+
+const BOOKTRIPS = gql `
+  mutation BookTrips($launchIds:[ID]!){
+    bookTrips(launchIds:$launchIds){
+      success
+      message
+      launches {
+        id
+        isBooked
+      }
+    }
+  }
+`
 
 function CreatingTopicModal(props){
-  const dispatch = useDispatch();
-
+  //const [createTopic, {data}] = useMutation(CREATE_NEW_TOPIC);
+  const [bookTrips, {data}] = useMutation(BOOKTRIPS);
   const [TopicName, setTopicName] = useState("");
   const [TopicType, setTopicType] = useState("");
   const [TopicDesc, setTopicDesc] = useState("");
@@ -16,22 +39,9 @@ function CreatingTopicModal(props){
 
   const onSubmit = (e) => {
     e.preventDefault();
-    const newTopic = {
-      topicName : TopicName,
-      topicType : TopicType,
-      topicDesc : TopicDesc,
-    };
-    dispatch(addTopic(newTopic)).then((response) => {
-      console.log('response : ', response);
-      if (response.payload.success) {
-        history.go(0);
-      } else {
-        alert("Failed to make a new topic.");
-      }
-    })
-    .catch((req)=>{
-      console.log("catched : ", req);
-    })
+    //createTopic({variables : { TopicName, TopicType, TopicDesc }});
+    bookTrips({variables : { launchIds : [TopicName] }});
+    history.go(0);
   } 
   
   const onChangeTopic = (e) => {
@@ -58,6 +68,7 @@ function CreatingTopicModal(props){
             <div className="sidebar-widget certificate-widget">
               <div className="widget-content">
                 <div className="content">
+                현재 apollo tutorial의 final 서버 사용으로, TopicName에 87~106 숫자만 받아 true로 바꾸는 것으로 대체
                   {/* Form */}
                   <div className="styled-form">
                     <form onSubmit={onSubmit}>
